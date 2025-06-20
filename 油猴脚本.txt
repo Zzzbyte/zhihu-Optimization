@@ -1,0 +1,83 @@
+// ==UserScript==
+// @name         知乎排版优化
+// @namespace    https://www.zhihu.com/
+// @version      1.0.0
+// @description  优化知乎网页排版，隐藏侧栏并拉宽主栏，增强阅读体验。
+// @author       Zzzbyte <2682375310@qq.com>
+// @match        https://www.zhihu.com/
+// @match        https://www.zhihu.com/follow
+// @match        https://www.zhihu.com/hot
+// @match        https://www.zhihu.com/question/*
+// @match        https://www.zhihu.com/people/*
+// @match        https://www.zhihu.com/search?*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+    const path = location.pathname;
+
+    // 工具函数：安全移除元素
+    function safeRemove(selector) {
+        const el = document.querySelector(selector);
+        if (el) el.remove();
+    }
+
+    // 工具函数：安全修改样式
+    function safeStyle(selector, styles) {
+        const el = document.querySelector(selector);
+        if (el) {
+            Object.assign(el.style, styles);
+        }
+    }
+
+    // 首页、关注页、热榜页
+    if (['/', '/follow', '/hot'].includes(path)) {
+        safeRemove('.GlobalSideBar');
+        safeStyle('.Topstory-mainColumn', {
+            marginLeft: '150px',
+            marginRight: '150px'
+        });
+    }
+
+    // 问题页
+    if (/^\/question\/\d+/.test(path)) {
+        safeRemove('.Question-sideColumn');
+        safeStyle('.Question-mainColumn', {
+            marginLeft: '155px'
+        });
+    }
+
+    // 用户主页
+    if (/^\/people\/[^/]+/.test(path)) {
+        safeStyle('.Profile-sideColumn', {
+            visibility: 'hidden'
+        });
+        safeStyle('.Profile-mainColumn', {
+            marginLeft: '155px'
+        });
+    }
+
+    // 搜索页
+    if (/^\/search/.test(path)) {
+        safeRemove('.SearchSideBar');
+        safeStyle('#SearchMain', {
+            marginLeft: '150px',
+            marginRight: '150px'
+        });
+    }
+
+    // 顶部导航栏不固定
+    (function () {
+        const header = document.querySelector('header');
+        if (!header) return;
+        window.addEventListener('scroll', () => {
+            header.className = "Sticky AppHeader";
+            const stickyHolder = document.querySelector('.Sticky--holder');
+            if (stickyHolder) {
+                stickyHolder.style.position = "absolute";
+                stickyHolder.style.height = "0";
+            }
+        });
+    })();
+})();
